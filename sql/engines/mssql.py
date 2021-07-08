@@ -8,7 +8,6 @@ from . import EngineBase
 import pyodbc
 from .models import ResultSet, ReviewSet, ReviewResult
 from sql.utils.data_masking import brute_mask
-
 logger = logging.getLogger('default')
 
 
@@ -34,7 +33,7 @@ client charset = UTF-8;connect timeout=10;CHARSET={4};""".format(self.host, self
     def get_all_tables(self, db_name, **kwargs):
         """获取table 列表, 返回一个ResultSet"""
         sql = """SELECT TABLE_NAME
-        FROM {0}.INFORMATION_SCHEMA.TABLES
+        FROM "{0}".INFORMATION_SCHEMA.TABLES
         WHERE TABLE_TYPE = 'BASE TABLE';""".format(db_name)
         result = self.query(db_name=db_name, sql=sql)
         tb_list = [row[0] for row in result.rows if row[0] not in ['test']]
@@ -57,13 +56,13 @@ client charset = UTF-8;connect timeout=10;CHARSET={4};""".format(self.host, self
         c.scale   ColumnScale,
         c.isnullable ColumnNull,
             case when i.id is not null then 'Y' else 'N' end TablePk
-        from (select name,id,uid from {0}..sysobjects where (xtype='U' or xtype='V') ) o 
-        inner join {0}..syscolumns c on o.id=c.id 
-        inner join {0}..systypes t on c.xtype=t.xusertype 
-        left join {0}..sysusers u on u.uid=o.uid
-        left join (select name,id,uid,parent_obj from {0}..sysobjects where xtype='PK' )  opk on opk.parent_obj=o.id 
-        left join (select id,name,indid from {0}..sysindexes) ie on ie.id=o.id and ie.name=opk.name
-        left join {0}..sysindexkeys i on i.id=o.id and i.colid=c.colid and i.indid=ie.indid
+        from (select name,id,uid from "{0}"..sysobjects where (xtype='U' or xtype='V') ) o 
+        inner join "{0}"..syscolumns c on o.id=c.id 
+        inner join "{0}"..systypes t on c.xtype=t.xusertype 
+        left join "{0}"..sysusers u on u.uid=o.uid
+        left join (select name,id,uid,parent_obj from "{0}"..sysobjects where xtype='PK' )  opk on opk.parent_obj=o.id 
+        left join (select id,name,indid from "{0}"..sysindexes) ie on ie.id=o.id and ie.name=opk.name
+        left join "{0}"..sysindexkeys i on i.id=o.id and i.colid=c.colid and i.indid=ie.indid
         WHERE O.name NOT LIKE 'MS%' AND O.name NOT LIKE 'SY%'
         and O.name='{1}'
         order by o.name,c.colid""".format(db_name, tb_name)
